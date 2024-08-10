@@ -29,7 +29,7 @@ possums <- readxl::read_excel("possum_bw.xlsx")
 
 ::: {.callout-important}
 ## Data
-For this cheatsheet we will use the entire possums dataset used in [BIOL2022](https://www.sydney.edu.au/units/BIOL2022) labs.
+For this cheatsheet we will use data from the possums dataset used in [BIOL2022](https://www.sydney.edu.au/units/BIOL2022) labs.
 
 {{< downloadthis possums.xlsx dname="possum" label="possum.xlsx" type="primary" >}}
 :::
