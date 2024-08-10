@@ -1,0 +1,134 @@
+---
+title: One-sample *t*-test in R
+subtitle: Cheatsheet
+date: today
+lightbox: true
+---
+
+```{r}
+#| include: false
+library(dplyr)
+library(tidyr)
+library(gt)
+possums <- readxl::read_excel("possum_bw.xlsx")
+```
+
+::: {.grid}
+::: {.g-col-6}
+{{< include _license.qmd >}}
+
+::: {.callout-note collapse="true"}
+## Assumed knowledge
+- You know how to install and load packages in R.
+- You know how to import data into R.
+- You recognise data frames and vectors.
+:::
+:::
+::: {.g-col-6}
+{{< include _tidy.qmd >}}
+
+::: {.callout-important}
+## Data
+For this cheatsheet we will use the entire possums dataset used in [BIOL2022](https://www.sydney.edu.au/units/BIOL2022) labs.
+
+{{< downloadthis possums.xlsx dname="possum" label="possum.xlsx" type="primary" >}}
+:::
+:::
+:::
+
+## About 
+The one-sample *t*-test is used to determine whether the mean of a single sample $y$ is significantly different from a known or hypothesised population mean ($\mu$). **Examples**:
+
+- Is the mean weight of canned tuna significantly different from what was stated on the label (400 g)?
+- Is the mean height of a sample of male students significantly different from the national average height (175.6 cm)? 
+- Is the mean number of kittens in a litter significantly different from 4?
+
+## Modelling
+
+> Is the mean **body weight** of possums (`BW`) significantly different from 3.5 kg?
+
+The [**simplified model**]{style="color:olive"} for the mathematically-adverse individual is $$\color{olive}\text{body weight} \sim 3.5$$ which translates to "the body weight of possums is *around* 3.5 kg".
+The [**statistical model**]{style="color:red"} is $$\color{red}\text{body weight} = \beta_0 + \epsilon$$ where $\beta_0$ is the hypothesised population mean and $\epsilon$ is the error term.
+
+### Preparing the data
+Extract **only** the variable of interest from the dataset using `select()` from the `dplyr` package – `BW`. Assign the variable to a new object -- `bw` in this case.
+
+```{r}
+library(dplyr)
+library(readxl)
+possums <- read_excel("possums.xlsx", sheet = 2) # import
+bw <- select(possums, BW) # select variable
+```
+
+Your own data should be in a similar format.
+
+## Analytical approaches
+The traditional approach to the one-sample *t*-test is to use the `t.test()` function in R, while the modern approach is to use a general linear model (GLM) with the `lm()` or `glm()` functions.
+
+::: panel-tabset
+
+## `t.test()` function
+
+### Methods reporting
+
+> A one-sample *t*-test was used to determine whether the mean body weight of possums was significantly different from 3.5 kg. This was computed using the `t.test()` function in R version 4.4.0 (R Core Team, 2024).
+
+### Perform the analysis
+```{r}
+#| results: hide
+t.test(bw, mu = 3.5)
+```
+
+### Check assumption(s)
+#### Normality
+Any combination of one or more of the following checks can be used to assess normality:
+
+- **Histogram**: `hist(bw$BW)`
+- **Q-Q plot**: `qqnorm(bw$BW)`
+- **Shapiro-Wilk test**: `shapiro.test(bw$BW)`
+
+Include the appropriate description in your methods section.
+
+> The normality of body weight was assessed using [insert method(s)].
+
+### How to report results
+> The mean body weight of possums was significantly different from 3.5 kg (t~19~ = -10.3, 95% CI [2.3, 2.7], p < 0.001).
+
+## `lm()` function
+
+### Methods reporting
+> A general linear model was used to determine whether the mean body weight of possums was significantly different from 3.5 kg. This was computed using the `lm()` function in R version 4.4.0 (R Core Team, 2024).
+
+### Perform the analysis
+
+For a one-sample *t*-test, the formula needs to be specified as `y - µ ~ 1` where `y` is the variable of interest and µ is the hypothesised value that is being tested. The `1` indicates that the model has an intercept only i.e. we are testing whether the mean difference is significantly different from 0.
+
+```{r}
+#| results: hide
+fit <- lm((BW - 3.5) ~ 1, data = bw)
+summary(fit)
+```
+
+### Check assumption(s)
+#### Normality
+
+With a GLM, normality can be assessed using the residuals of the model. The following checks can be used:
+
+- **Histogram**: `hist(residuals(fit))`
+- **Q-Q plot**: `qqnorm(residuals(fit))`
+- **Shapiro-Wilk test**: `shapiro.test(residuals(fit))`
+
+### How to report results
+
+> There is evidence to suggest that the mean body weight of possums was significantly different from 3.5 kg (GLM, t~19~ = -10.3, p < 0.001).
+
+:::
+
+## Exercise(s)
+
+Download the penguins dataset (from below if you are reading this in HTML), or load the dataset from the `palmerpenguins` package. Perform a one-sample *t*-test to determine whether the mean flipper length of penguins is significantly different from 200 mm. 
+
+{{< downloadthis penguins.csv dname="penguins" label="penguins.csv" type="primary" >}}
+
+
+
